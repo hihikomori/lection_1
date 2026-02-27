@@ -1,3 +1,4 @@
+#include <cstddef>
 
 template < class T > struct BiList
 {
@@ -90,7 +91,20 @@ template < class T, class F > F traverse_from_tail(F f, BiList< T > *t, BiList< 
   return f;
 }
 
-template < class T > BiList< T > *ToListConverter(T *array);
+template < class T > BiList< T > *ToListConverter(const T *array, size_t s)
+{
+  if (!array || !s) {
+    return nullptr;
+  }
+
+  BiList< T > *head = add(nullptr, array[0]);
+  BiList< T > *list = head;
+  for (size_t i = 1; i < s; ++i) {
+    list = insert(list, array[i]);
+  }
+
+  return head;
+}
 
 int main()
 {}
