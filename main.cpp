@@ -6,25 +6,91 @@ template < class T > struct BiList
   BiList< T > *prev;
 };
 
-template < class T > BiList< T > *add(BiList< T > *h, const T &d);
+// /new/ -> h -> h.next
+// h.prev-> ↑
+template < class T > BiList< T > *add(BiList< T > *h, const T &d)
+{
+  BiList< T > *head = new BiList< T >{d, h, h ? h->prev : nullptr};
 
-template < class T > BiList< T > *insert(BiList< T > *h, const T &d);
+  if (head->prev) {
+    head->prev->next = head;
+  }
 
-template < class T > BiList< T > *add(BiList< T > *h, const T &d);
+  if (head->next) {
+    head->next->prev = head;
+  }
+  return head;
+}
 
-template < class T > BiList< T > *insert(BiList< T > *h, const T &d);
+template < class T > BiList< T > *insert(BiList< T > *h, const T &d)
+{
+  BiList< T > *head = new BiList< T >{d, h ? h->prev : nullptr, h};
 
-template < class T > BiList< T > *cut(BiList< T > *h);
+  if (h->next) {
+    head->next->prev = head;
+  }
+  h->next = head;
 
-template < class T > BiList< T > *erase(BiList< T > *h);
+  return head;
+}
 
-template < class T > BiList< T > *clear(BiList< T > *h);
+template < class T > BiList< T > *cut(BiList< T > *h) noexcept
+{
+  BiList< T > *prev = h->prev;
+  BiList< T > *next = h->next;
 
-template < class T > BiList< T > *clear(BiList< T > *h, BiList< T > *e);
+  if (prev) {
+    prev->next = next;
+  }
 
-template < class T, class F > F traverse_from_head(F f, BiList< T > *h, BiList< T > *e);
+  if (next) {
+    next->prev = prev;
+  }
 
-template < class T, class F > F traverse_from_tail(F f, BiList< T > *h, BiList< T > *e);
+  delete h;
+
+  return next;
+}
+
+template < class T > BiList< T > *erase(BiList< T > *h) noexcept
+{
+  if (!h || !h->next) {
+    return nullptr;
+  }
+
+  cut(h->next);
+
+  return h;
+}
+
+template < class T > BiList< T > *clear(BiList< T > *h, BiList< T > *e) noexcept
+{
+  while (h != e) {
+    h = cut(h);
+  }
+  return h;
+}
+
+template < class T, class F > F traverse_from_head(F f, BiList< T > *h, BiList< T > *e)
+{
+  while (h != nullptr && h != e) {
+    f(h->val);
+    h = h->next;
+  }
+  return f;
+}
+
+template < class T, class F > F traverse_from_tail(F f, BiList< T > *t, BiList< T > *e)
+{
+  while (t != nullptr && t != e) {
+    f(t->val);
+    t = t->prev;
+  }
+
+  return f;
+}
+
+template < class T > BiList< T > *ToListConverter(T *array);
 
 int main()
 {}
