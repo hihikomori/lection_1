@@ -1,4 +1,13 @@
 #include <cstddef>
+#include <iostream>
+
+struct funcPod
+{
+  void operator()(int val) const
+  {
+    std::cout << val << '\t';
+  }
+};
 
 template < class T > struct BiList
 {
@@ -7,8 +16,6 @@ template < class T > struct BiList
   BiList< T > *prev;
 };
 
-// /new/ -> h -> h.next
-// h.prev-> ↑
 template < class T > BiList< T > *add(BiList< T > *h, const T &d)
 {
   BiList< T > *head = new BiList< T >{d, h, h ? h->prev : nullptr};
@@ -25,7 +32,11 @@ template < class T > BiList< T > *add(BiList< T > *h, const T &d)
 
 template < class T > BiList< T > *insert(BiList< T > *h, const T &d)
 {
-  BiList< T > *head = new BiList< T >{d, h ? h->prev : nullptr, h};
+  if (!h) {
+    return nullptr;
+  }
+
+  BiList< T > *head = new BiList< T >{d, h->next, h};
 
   if (h->next) {
     head->next->prev = head;
@@ -37,6 +48,10 @@ template < class T > BiList< T > *insert(BiList< T > *h, const T &d)
 
 template < class T > BiList< T > *cut(BiList< T > *h) noexcept
 {
+  if (!h) {
+    return nullptr;
+  }
+
   BiList< T > *prev = h->prev;
   BiList< T > *next = h->next;
 
@@ -66,7 +81,7 @@ template < class T > BiList< T > *erase(BiList< T > *h) noexcept
 
 template < class T > BiList< T > *clear(BiList< T > *h, BiList< T > *e) noexcept
 {
-  while (h != e) {
+  while (h != nullptr && h != e) {
     h = cut(h);
   }
   return h;
@@ -97,7 +112,7 @@ template < class T > BiList< T > *ToListConverter(const T *array, size_t s)
     return nullptr;
   }
 
-  BiList< T > *head = add(nullptr, array[0]);
+  BiList< T > *head = add(static_cast< BiList< int > * >(nullptr), array[0]);
   BiList< T > *list = head;
   for (size_t i = 1; i < s; ++i) {
     list = insert(list, array[i]);
@@ -107,4 +122,12 @@ template < class T > BiList< T > *ToListConverter(const T *array, size_t s)
 }
 
 int main()
-{}
+{
+  int arr[] = {5, 2, 3, 1, 4};
+  BiList< int > *list = ToListConverter(arr, 5);
+
+  traverse_from_head(funcPod{}, list, static_cast< BiList< int > * >(nullptr));
+  std::cout << "\n";
+
+  list = clear(list, static_cast< BiList< int > * >(nullptr));
+}
